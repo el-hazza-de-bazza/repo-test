@@ -1,3 +1,3 @@
-from parameters import x
+from src.parameters import x
 print(x)
 
