@@ -1,7 +1,6 @@
-import sys
+%load_ext autoreload
+%autoreload 2
 
-# Replace with the exact path where you cloned repo-test
-sys.path.append(r"C:\Users\harry\repo-test")
-
-from src.parameters import x
-print(x)
+# DO THIS (works with autoreload):
+import src.parameters as parameters
+print(parameters.x)
