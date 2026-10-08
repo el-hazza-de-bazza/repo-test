@@ -1,3 +1,3 @@
-from parameters import x
-print(x)
+from src.parameters import x
 
+print("x is:", x)
