@@ -11,6 +11,7 @@ freq_range = np.linspace(10**12, 2*10**14, 50)
 # Plotting with publication-ready styling
 plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
+plt.subplots_adjust(bottom=0.25)
 
 rainbow_colors = [
     '#FF0000',  # 1. Pure Red
@@ -44,6 +45,51 @@ for i in range(len(temps)):
         )
     ax.axvline(5.87892576 * 10**10 * temps[i], color=rainbow_colors[-i-1], linestyle='--', linewidth=1)
 
+initial_temp = 800
+initial_max_freq = 2*10**14
+special_freq_range = np.linspace(10**12, initial_max_freq, 50)
+curve, = ax.plot(special_freq_range,
+        planck_spectrum(special_freq_range, initial_temp),
+        color='black',      # Elegant crimson red
+        linewidth=2,
+        marker="o",
+        markersize=5,
+        markerfacecolor="white",
+        markeredgewidth=1.5,
+        )
+#line, = ax.axvline(5.87892576 * 10**10 * initial_temp, color='black', linestyle='-', linewidth=1)
+
+ax_slider1 = fig.add_axes([0.25, 0.1, 0.65, 0.03])
+temp_slider = Slider(
+    ax=ax_slider1,
+    label='Temperature',
+    valmin=100,
+    valmax=10000,
+    valinit=initial_temp,
+)
+ax_slider2 = fig.add_axes([0.25, 0.05, 0.65, 0.03])
+maximum_freq_slider = Slider(
+    ax=ax_slider2,
+    label='Maximum Frequency',
+    valmin=2*10**14,
+    valmax=2*10**15,
+    valinit=2*10**14,
+)
+
+# 3. Define the update function
+def update(val):
+    current_temp = temp_slider.val
+    current_max_freq = maximum_freq_slider.val
+    current_freq_range = np.linspace(10**12, current_max_freq, 50)
+    curve.set_ydata(planck_spectrum(current_freq_range, current_temp))
+    curve.set_xdata(current_freq_range)
+    ax.relim()
+    ax.autoscale_view()
+    fig.canvas.draw_idle()  # Redraw the figure efficiently
+
+# 4. Connect the slider to the update function
+temp_slider.on_changed(update)
+maximum_freq_slider.on_changed(update)
 
 # Axis labels and limits
 ax.set_xlabel("Frequency (Hz)", fontsize=16, fontweight="bold")
