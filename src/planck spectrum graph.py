@@ -35,7 +35,7 @@ for i in range(len(temps)):
     ax.plot(
         freq_range,
         planck_spectrum(freq_range, temps[i]),
-        color=rainbow_colors[-i-1],      # Elegant crimson red
+        color=rainbow_colors[-i-1],   
         linewidth=2,
         marker="o",
         markersize=5,
@@ -50,7 +50,7 @@ initial_max_freq = 2*10**14
 special_freq_range = np.linspace(10**12, initial_max_freq, 50)
 curve, = ax.plot(special_freq_range,
         planck_spectrum(special_freq_range, initial_temp),
-        color='black',      # Elegant crimson red
+        color='black',     
         linewidth=2,
         marker="o",
         markersize=5,
