@@ -13,10 +13,13 @@ HITRAN_data = pd.read_csv(
     header=0,
 )
 df_HITRAN = pd.DataFrame(HITRAN_data)
-wavenumber = np.array(df_HITRAN[df_HITRAN.columns[0]].values.tolist())
+df_HITRAN_filtered = df_HITRAN[(df_HITRAN.iloc[:, 1] > 10**(-24))] # filtering out data that wont have much of an effect to make code faster
+
+wavenumber = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[0]].values.tolist())
 absorption_frequencies = wavenumber*(c*10**2) # converts wavenumber in /cm to frequency in Hz
-spectral_line_intensity = np.array(df_HITRAN[df_HITRAN.columns[1]].values.tolist()) * (10**(-2)) #converting units from whatever cursed units HITRAN is using to SI units
-pressure_broadening = np.array(df_HITRAN[df_HITRAN.columns[2]].values.tolist()) * (10**(2)/101325) #converting units from whatever cursed units HITRAN is using to SI units
+spectral_line_intensity = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[1]].values.tolist()) * (10**(-2)) #converting units from whatever cursed units HITRAN is using to SI units
+pressure_broadening = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[2]].values.tolist()) * (10**(2)/101325) #converting units from whatever cursed units HITRAN is using to SI units
+print(len(df_HITRAN.iloc[:,1])/len(wavenumber))
 
 """plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
