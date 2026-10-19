@@ -47,7 +47,7 @@ plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.
 fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
 cross_sections = []
 for i in range(len(absorption_frequencies)):
-    cross_sections = cross_sections + [cross_section(round(len(absorption_frequencies)/2), absorption_frequencies[i], 0)]
+    cross_sections = cross_sections + [cross_section(round(len(absorption_frequencies)/3), absorption_frequencies[i], 0)]
 ax.plot(
         absorption_frequencies,
         cross_sections,
