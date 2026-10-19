@@ -48,14 +48,10 @@ fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
 cross_sections = []
 for i in range(len(absorption_frequencies)):
     cross_sections = cross_sections + [cross_section(i, absorption_frequencies[i], 0)]
-ax.plot(
+ax.scatter(
         absorption_frequencies,
         cross_sections,
-        linewidth=2,
-        marker="o",
-        markersize=5,
-        markerfacecolor="white",
-        markeredgewidth=1.5,
+        s=1
         )
 ax.set_xlabel("Frequency (Hz)", fontsize=16, fontweight="bold")
 ax.set_ylabel("Cross-Section (/cm^2)", fontsize=16, fontweight="bold")
