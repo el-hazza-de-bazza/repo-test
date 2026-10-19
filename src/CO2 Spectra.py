@@ -13,7 +13,7 @@ HITRAN_data = pd.read_csv(
     header=0,
 )
 df_HITRAN = pd.DataFrame(HITRAN_data)
-df_HITRAN_filtered = df_HITRAN[(df_HITRAN.iloc[:, 1] > 10**(-24))] # filtering out data that wont have much of an effect to make code faster
+df_HITRAN_filtered = df_HITRAN[(df_HITRAN.iloc[:, 1] > 10**(-22))] # filtering out data that wont have much of an effect to make code faster
 
 wavenumber = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[0]].values.tolist())
 absorption_frequencies = wavenumber*(c*10**2) # converts wavenumber in /cm to frequency in Hz
@@ -43,14 +43,19 @@ plt.show()"""
 def cross_section(index, frequency, altitude):
     temperature = 296
     pressure = 101325
-    broadening_at_alt = (number_density(altitude)/(pressure/(boltzmann*temperature)))*pressure_broadening[index]    # we are adjusting the pressure broadening
+    """broadening_at_alt = (number_density(altitude)/(pressure/(boltzmann*temperature)))*pressure_broadening[index]"""    # we are adjusting the pressure broadening
+    broadening_at_alt = pressure_broadening[index]
     return (spectral_line_intensity[index] * broadening_at_alt) / (np.pi * (broadening_at_alt**2 + (frequency - absorption_frequencies[index])**2))
 
 plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
-cross_sections = []
-for i in range(len(absorption_frequencies)):
-    cross_sections = cross_sections + [cross_section(i, absorption_frequencies[i], 0)]
+
+length_ = len(absorption_frequencies)
+cross_sections = np.zeros(length_)
+for r in range(length_):
+    for i in range(length_):
+        cross_sections[r] += cross_section(i, absorption_frequencies[r], 0)
+
 ax.scatter(
         absorption_frequencies,
         cross_sections,
@@ -63,4 +68,3 @@ ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
 ax.grid(True, which="major", linestyle="--", alpha=0.5)
 plt.show()
-
