@@ -19,3 +19,5 @@ def number_density(altitude):
     pressure = 101325
     return pressure/(boltzmann*temperature)
 
+def spectral_irradiance(radius_of_source, distance, frequency, temperature):
+    return np.pi * planck_spectrum(frequency, temperature) * (radius_of_source/distance)**2
