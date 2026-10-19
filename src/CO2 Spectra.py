@@ -45,18 +45,19 @@ def cross_section(index, frequency, altitude):
 
 plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
-cross_sections = []
-for i in range(len(absorption_frequencies)):
-    cross_sections = cross_sections + [cross_section(round(len(absorption_frequencies)/2), absorption_frequencies[i], 0)]
-ax.plot(
-        absorption_frequencies,
-        cross_sections,
-        linewidth=2,
-        marker="o",
-        markersize=5,
-        markerfacecolor="white",
-        markeredgewidth=1.5,
-        )
+for r in range(len(absorption_frequencies)):
+    cross_sections = []
+    for i in range(len(absorption_frequencies[::100])):
+        cross_sections = cross_sections + [cross_section(r, absorption_frequencies[::100][i], 0)]
+    ax.plot(
+            absorption_frequencies,
+            cross_sections,
+            linewidth=2,
+            marker="o",
+            markersize=5,
+            markerfacecolor="white",
+            markeredgewidth=1.5,
+            )
 ax.set_xlabel("Frequency (Hz)", fontsize=16, fontweight="bold")
 ax.set_ylabel("Cross-Section (/cm^2)", fontsize=16, fontweight="bold")
 ax.tick_params(axis="both", which="major", labelsize=14, direction="in", length=6, width=1.2)
