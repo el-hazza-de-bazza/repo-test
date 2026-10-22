@@ -70,11 +70,11 @@ for i in range(len(frequencies_section_3)):
 for i in range(len(frequencies_section_2)):
     SI_2[i] = spectral_irradiance(radius_earth, altitude + radius_earth, frequencies_section_2[i], 296) * np.exp(-1 * altitude * co2_concentration * number_density(altitude) * cross_sections[i])
 
-SI = SI_1.append(SI_2)
-SI = SI.append(SI_3)
-freq_sections = frequencies_section_1.append(frequencies_section_2)
-freq_sections = freq_sections.append(frequencies_section_3)
-ax.plot(freq_sections, SI, color = 'blue')
+SI = np.append(SI_1, [SI_2])
+SI = np.append(SI, [SI_3])
+freq_sections = np.append(frequencies_section_1, [frequencies_section_2])
+freq_sections = np.append(freq_sections, [frequencies_section_3])
+ax.plot(freq_sections, SI, color = 'red')
 
 
 ax.set_xlabel("Wavenumber (/m)", fontsize=16, fontweight="bold")
