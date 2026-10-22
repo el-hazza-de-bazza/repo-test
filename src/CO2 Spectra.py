@@ -51,13 +51,14 @@ ax.grid(True, which="major", linestyle="--", alpha=0.5)
 plt.show()"""
 
 from functions import spectral_irradiance
-altitude = 1 # metres
+altitude = 100 # metres
 radius_earth = 6.3781 * 10**6 # metres
+from parameters import co2_concentration
 
 freq_step_size = 10**12
 frequencies_section_1 = np.arange(10**11, wavenumber[0]*c, freq_step_size)
 SI_1 = np.zeros(len(frequencies_section_1))
-frequencies_section_3 = np.arange(wavenumber[-1]*c+freq_step_size, 10**14, freq_step_size)
+frequencies_section_3 = np.arange(wavenumber[-1]*c, 10**14, freq_step_size)
 SI_3 = np.zeros(len(frequencies_section_3))
 frequencies_section_2 = wavenumber*c
 SI_2 = np.zeros(len(frequencies_section_2))
@@ -67,11 +68,14 @@ for i in range(len(frequencies_section_1)):
 for i in range(len(frequencies_section_3)):
     SI_3[i] = spectral_irradiance(radius_earth, altitude + radius_earth, frequencies_section_3[i], 296)
 for i in range(len(frequencies_section_2)):
-    SI_2[i] = spectral_irradiance(radius_earth, altitude + radius_earth, frequencies_section_2[i], 296) * np.exp(-1 * altitude * number_density(altitude) * cross_sections[i])
+    SI_2[i] = spectral_irradiance(radius_earth, altitude + radius_earth, frequencies_section_2[i], 296) * np.exp(-1 * altitude * co2_concentration * number_density(altitude) * cross_sections[i])
 
-ax.plot(frequencies_section_1, SI_1, color = 'blue')
-ax.plot(frequencies_section_2, SI_2, color = 'red')
-ax.plot(frequencies_section_3, SI_3, color = 'blue')
+SI = SI_1.append(SI_2)
+SI = SI.append(SI_3)
+freq_sections = frequencies_section_1.append(frequencies_section_2)
+freq_sections = freq_sections.append(frequencies_section_3)
+ax.plot(freq_sections, SI, color = 'blue')
+
 
 ax.set_xlabel("Wavenumber (/m)", fontsize=16, fontweight="bold")
 ax.set_ylabel("Cross-Section (/m^2)", fontsize=16, fontweight="bold")
