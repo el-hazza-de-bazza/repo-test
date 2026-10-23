@@ -51,7 +51,7 @@ ax.grid(True, which="major", linestyle="--", alpha=0.5)
 plt.show()"""
 
 from functions import spectral_irradiance
-altitude = 100 # metres
+altitude = 10 # metres
 radius_earth = 6.3781 * 10**6 # metres
 from parameters import co2_concentration
 
@@ -83,4 +83,5 @@ ax.tick_params(axis="both", which="major", labelsize=14, direction="in", length=
 ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
 ax.grid(True, which="major", linestyle="--", alpha=0.5)
+plt.savefig("CO2 Spectra V1.png", dpi=150)
 plt.show()
