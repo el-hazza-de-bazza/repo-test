@@ -39,12 +39,13 @@ def pressure_atm(altitude):
 
 #Number density in atmosphere - derived from ideal gas law
 def number_density(altitude):
-    #accepts altitude above sea level
-    #should take data from a source for pressure and temperature - later venture
-    # currently uses sea level temperature (T=296K as used by HITRAN) and pressure (1 atm = 101325 Pa)
-    temperature = temperature_atm(altitude)
-    pressure = pressure_atm(altitude)
-    return pressure/(boltzmann*temperature)
+    if np.isscalar(altitude) == True:
+        return pressure_atm(altitude)/(boltzmann*temperature_atm(altitude))
+    if np.isscalar(altitude) == False:
+        nd_array = np.zeros(len(altitude))
+        for t in range(len(altitude)):
+             nd_array[t] = pressure_atm(altitude[t])/(boltzmann*temperature_atm(altitude[t]))
+        return nd_array
 
 """plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
@@ -81,7 +82,10 @@ def schwarzschild_equation(wavenumber, max_altitude, no_altitude_steps, spectral
              cross_section_sum += cross_section(i, wavenumber, altitudes[r], spectral_line_intensity, wavenumber_array, pressure_broadening)
          number_density_r = number_density(altitudes[r])
          planck_radiance_r = planck_spectrum(wavenumber*c, temperature_atm(altitudes[r]))
-         spectral_radiances_dI[r] = dz * (-1 * number_density_r * cross_section_sum) * (spectral_radiances_dI[r-1] - planck_radiance_r)
+         if r == 0:
+             spectral_radiances_dI[0] = dz * (-1 * number_density_r * cross_section_sum) * (initial_radiance - planck_radiance_r)
+         else:
+             spectral_radiances_dI[r] = dz * (-1 * number_density_r * cross_section_sum) * (spectral_radiances_dI[r-1] - planck_radiance_r)
      spectral_radiances_integral = 0
      for i in range(len(spectral_radiances_dI)):
           spectral_radiances_integral += spectral_radiances_dI[i]

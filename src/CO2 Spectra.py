@@ -22,16 +22,24 @@ print(len(df_HITRAN.iloc[:,1])/len(wavenumber))
 
 idfk = np.zeros(len(wavenumber))
 for k in range(len(wavenumber)):
-    idfk[k] = schwarzschild_equation(wavenumber[k], 32000, 1, spectral_line_intensity, wavenumber, pressure_broadening, 296)
+    idfk[k] = schwarzschild_equation(wavenumber[k], 31000, 3, spectral_line_intensity, wavenumber, pressure_broadening, 296)
 plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
 
 ax.plot(
         wavenumber*c,
-        idfk
+        abs(idfk)
         
         )
-ax.set_xlabel("Wavenumber (/m)", fontsize=16, fontweight="bold")
+idfk2 = np.zeros(len(wavenumber))
+for k in range(len(wavenumber)):
+    idfk2[k] = schwarzschild_equation(wavenumber[k], 31000, 3, spectral_line_intensity, wavenumber, pressure_broadening, 1000)
+ax.plot(
+        wavenumber*c,
+        abs(idfk2)
+        
+        )
+ax.set_xlabel("Frequency (Hz)", fontsize=16, fontweight="bold")
 ax.set_ylabel("Spectral Radiance", fontsize=16, fontweight="bold")
 ax.tick_params(axis="both", which="major", labelsize=14, direction="in", length=6, width=1.2)
 ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
