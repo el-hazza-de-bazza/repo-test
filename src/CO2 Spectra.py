@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 from parameters import c
 import matplotlib.pyplot as plt
-from functions import temperature_atm, pressure_atm, number_density
+from functions import temperature_atm, pressure_atm, number_density, schwarzschild_equation
 
 HITRAN_data = pd.read_csv(
     Path(__file__).with_name("CO2Min.csv"),
@@ -20,6 +20,25 @@ spectral_line_intensity = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns
 pressure_broadening = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[2]].values.tolist()) * (10**(2)) #converting units from whatever cursed units HITRAN is using to SI units.101325
 print(len(df_HITRAN.iloc[:,1])/len(wavenumber))
 
+idfk = np.zeros(len(wavenumber))
+for k in range(len(wavenumber)):
+    idfk[k] = schwarzschild_equation(wavenumber[k], 32000, 1, spectral_line_intensity, wavenumber, pressure_broadening, 296)
+plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
+fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
+
+ax.plot(
+        wavenumber*c,
+        idfk
+        
+        )
+ax.set_xlabel("Wavenumber (/m)", fontsize=16, fontweight="bold")
+ax.set_ylabel("Spectral Radiance", fontsize=16, fontweight="bold")
+ax.tick_params(axis="both", which="major", labelsize=14, direction="in", length=6, width=1.2)
+ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
+ax.minorticks_on()
+ax.grid(True, which="major", linestyle="--", alpha=0.5)
+plt.show()
+
 """def cross_section(index, frequency, altitude):
     temperature = 296
     pressure = 101325
@@ -27,7 +46,7 @@ print(len(df_HITRAN.iloc[:,1])/len(wavenumber))
     broadening_at_alt = pressure_broadening[index]
     return (spectral_line_intensity[index] * broadening_at_alt) / (np.pi * (broadening_at_alt**2 + (frequency - wavenumber[index])**2))"""
 
-def cross_section(index, frequency, altitude):
+"""def cross_section(index, frequency, altitude):
     temperature = 296 # this is correct
     pressure = 101325 # yeah leave this
     broadening_at_alt = (number_density(altitude)/(pressure/(boltzmann*temperature)))*pressure_broadening[index]    # we are adjusting the pressure broadening
@@ -53,7 +72,7 @@ ax.tick_params(axis="both", which="major", labelsize=14, direction="in", length=
 ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
 ax.grid(True, which="major", linestyle="--", alpha=0.5)
-plt.show()
+plt.show()"""
 
 """from functions import spectral_irradiance
 altitude = 10 # metres

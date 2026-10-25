@@ -33,7 +33,7 @@ def pressure_atm(altitude):
         return 22632 * np.exp(-9.80665 * (altitude - 11000) / (287.05287 * temperature_atm(altitude)))
     if 32000 > altitude >= 20000:
         return 5474.9 * (temperature_atm(altitude)/(273.15 - 56.5)) ** (-9.80665 / (287.05287 * (1/1000)))
-    if altitude >= 32000:
+    if altitude > 32000:
         print('atmospheric pressure/temperature model weak here')
         return 868.02
 
