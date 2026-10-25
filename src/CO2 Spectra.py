@@ -1,11 +1,10 @@
-from functions import number_density
 from parameters import boltzmann
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from parameters import c
 import matplotlib.pyplot as plt
-
+from functions import temperature_atm, pressure_atm, number_density
 
 HITRAN_data = pd.read_csv(
     Path(__file__).with_name("CO2Min.csv"),
@@ -21,11 +20,17 @@ spectral_line_intensity = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns
 pressure_broadening = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[2]].values.tolist()) * (10**(2)) #converting units from whatever cursed units HITRAN is using to SI units.101325
 print(len(df_HITRAN.iloc[:,1])/len(wavenumber))
 
-def cross_section(index, frequency, altitude):
+"""def cross_section(index, frequency, altitude):
     temperature = 296
     pressure = 101325
-    """broadening_at_alt = (number_density(altitude)/(pressure/(boltzmann*temperature)))*pressure_broadening[index]"""    # we are adjusting the pressure broadening
+    broadening_at_alt = (number_density(altitude)/(pressure/(boltzmann*temperature)))*pressure_broadening[index]    # we are adjusting the pressure broadening
     broadening_at_alt = pressure_broadening[index]
+    return (spectral_line_intensity[index] * broadening_at_alt) / (np.pi * (broadening_at_alt**2 + (frequency - wavenumber[index])**2))"""
+
+def cross_section(index, frequency, altitude):
+    temperature = 296 # this is correct
+    pressure = 101325 # yeah leave this
+    broadening_at_alt = (number_density(altitude)/(pressure/(boltzmann*temperature)))*pressure_broadening[index]    # we are adjusting the pressure broadening
     return (spectral_line_intensity[index] * broadening_at_alt) / (np.pi * (broadening_at_alt**2 + (frequency - wavenumber[index])**2))
 
 plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
@@ -37,7 +42,7 @@ for r in range(length_):
     for i in range(length_):
         cross_sections[r] += cross_section(i, wavenumber[r], 0)
 
-"""ax.plot(
+ax.plot(
         wavenumber*c,
         cross_sections
         
@@ -48,9 +53,9 @@ ax.tick_params(axis="both", which="major", labelsize=14, direction="in", length=
 ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
 ax.grid(True, which="major", linestyle="--", alpha=0.5)
-plt.show()"""
+plt.show()
 
-from functions import spectral_irradiance
+"""from functions import spectral_irradiance
 altitude = 10 # metres
 radius_earth = 6.3781 * 10**6 # metres
 from parameters import co2_concentration
@@ -84,4 +89,4 @@ ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
 ax.grid(True, which="major", linestyle="--", alpha=0.5)
 plt.savefig("CO2 Spectra V1.png", dpi=150)
-plt.show()
+plt.show()"""
