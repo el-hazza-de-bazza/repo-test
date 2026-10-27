@@ -34,6 +34,7 @@ ax.plot(
 idfk2 = np.zeros(len(wavenumber))
 for k in range(len(wavenumber)):
     idfk2[k] = schwarzschild_equation(wavenumber[k], 31000, 3, spectral_line_intensity, wavenumber, pressure_broadening, 1000)
+    # Need to convert into intensity
 ax.plot(
         wavenumber*c,
         abs(idfk2)

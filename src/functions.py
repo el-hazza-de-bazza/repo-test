@@ -1,6 +1,6 @@
 from parameters import h
 from parameters import c
-from parameters import boltzmann
+from parameters import boltzmann, average_sun_radius, earth_sun_distance
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,6 +10,11 @@ def planck_spectrum(freq, temperature):
     #accepts freq in Hz and temperature in K
     #returns spectral radiance in units W / m^2 / sr / Hz
     return (2*h*(freq**3)/(c**2))/(np.exp((h*freq)/(boltzmann*temperature)) - 1)
+
+def planck_intensity(freq, temperature):
+     #accepts freq in Hz and temperature in K
+     #returns spectral radiance in units W / m^2 / Hz
+     return np.pi * ((average_sun_radius/earth_sun_distance)**2) * (2*h*(freq**3)/(c**2))/(np.exp((h*freq)/(boltzmann*temperature)) - 1)
 
 # Temperature and pressure models taken from ICAO Standard Atmosphere model : https://en.wikipedia.org/wiki/International_Standard_Atmosphere and https://www.aviationhunt.com/standard-atmosphere-calculator/
 #Atmospheric Temperature:
@@ -89,4 +94,5 @@ def schwarzschild_equation(wavenumber, max_altitude, no_altitude_steps, spectral
      spectral_radiances_integral = 0
      for i in range(len(spectral_radiances_dI)):
           spectral_radiances_integral += spectral_radiances_dI[i]
+     print('YO THIS IS IN SPECTRAL RADIANCE NOT INTENSITY')
      return spectral_radiances_integral

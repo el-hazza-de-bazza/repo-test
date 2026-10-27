@@ -9,3 +9,4 @@ stefan_boltzmann = 5.670374419 * 10 **(-8)
 average_earth_radius = 6371 * (10 ** 3)
 average_sun_radius = 695700 * (10 ** 3)
 earth_sun_distance = 149.6 * (10 ** 9)
+sun_temperature = 5772
