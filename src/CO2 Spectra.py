@@ -20,7 +20,7 @@ spectral_line_intensity = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns
 pressure_broadening = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[2]].values.tolist()) * (10**(2)) #converting units from whatever cursed units HITRAN is using to SI units.101325
 print(len(df_HITRAN.iloc[:,1])/len(wavenumber))
 
-idfk = np.zeros(len(wavenumber))
+"""idfk = np.zeros(len(wavenumber))
 for k in range(len(wavenumber)):
     idfk[k] = schwarzschild_equation(wavenumber[k], 31000, 3, spectral_line_intensity, wavenumber, pressure_broadening, 296)
 plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
@@ -46,7 +46,7 @@ ax.tick_params(axis="both", which="major", labelsize=14, direction="in", length=
 ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
 ax.grid(True, which="major", linestyle="--", alpha=0.5)
-plt.show()
+plt.show()"""
 
 """def cross_section(index, frequency, altitude):
     temperature = 296
@@ -55,14 +55,19 @@ plt.show()
     broadening_at_alt = pressure_broadening[index]
     return (spectral_line_intensity[index] * broadening_at_alt) / (np.pi * (broadening_at_alt**2 + (frequency - wavenumber[index])**2))"""
 
-"""def cross_section(index, frequency, altitude):
+def cross_section(index, frequency, altitude):
     temperature = 296 # this is correct
     pressure = 101325 # yeah leave this
     broadening_at_alt = (number_density(altitude)/(pressure/(boltzmann*temperature)))*pressure_broadening[index]    # we are adjusting the pressure broadening
     return (spectral_line_intensity[index] * broadening_at_alt) / (np.pi * (broadening_at_alt**2 + (frequency - wavenumber[index])**2))
 
-plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
-fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
+#plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
+import matplotlib as mpl
+import matplotlib.font_manager
+from IPython.core.display import HTML
+mpl.rcParams['font.family'] = 'cmr10'
+fig, ax = plt.subplots(figsize=(8, 5), dpi=150)
+
 
 length_ = len(absorption_frequencies)
 cross_sections = np.zeros(length_)
@@ -71,17 +76,19 @@ for r in range(length_):
         cross_sections[r] += cross_section(i, wavenumber[r], 0)
 
 ax.plot(
-        wavenumber*c,
+        wavenumber*c*10**(-12),
         cross_sections
         
         )
-ax.set_xlabel("Wavenumber (/m)", fontsize=16, fontweight="bold")
-ax.set_ylabel("Cross-Section (/m^2)", fontsize=16, fontweight="bold")
+ax.set_xlabel("Frequency (THz)", fontsize=18, fontweight="bold")
+ax.set_ylabel("Cross-Section (m$^{-2}$)", fontsize=18, fontweight="bold")
 ax.tick_params(axis="both", which="major", labelsize=14, direction="in", length=6, width=1.2)
 ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
-ax.grid(True, which="major", linestyle="--", alpha=0.5)
-plt.show()"""
+ax.set_yscale('log')
+#ax.grid(True, which="major", linestyle="--", alpha=0.5)
+plt.savefig("co2 cross section v1.png", dpi=150)
+plt.show()
 
 """from functions import spectral_irradiance
 altitude = 10 # metres
