@@ -31,8 +31,9 @@ planck_intensity = np.pi * ((average_sun_radius/earth_sun_distance)**2) * planck
 import matplotlib as mpl
 import matplotlib.font_manager
 from IPython.core.display import HTML
+dpi = 150 
 mpl.rcParams['font.family'] = 'cmr10'
-fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
+fig, ax = plt.subplots(figsize=(8, 4), dpi=dpi)
 
 frequency_THz = c / wavelength / 1e12
 intensity_per_frequency = intensity_per_wavelength * wavelength**2 / c
@@ -46,7 +47,7 @@ ax.plot(frequency_THz[order], intensity_per_frequency[order]*10**(12), color = "
 ax.set_xlim(0, 1500)
 ax.set_ylim(0, 2.65)
 ax.set_xlabel("Frequency (THz)", fontsize=18, fontweight="bold")
-ax.set_ylabel("Spectral Irradiance (10$^{-12}$ W m$^{-2}$ Hz$^{-1}$)", fontsize=18, fontweight="bold")
+ax.set_ylabel("Spectral Irradiance\n(10$^{-12}$ W m$^{-2}$ Hz$^{-1}$)", fontsize=18, fontweight="bold")
 
 """ax.plot(
         wavelength,
@@ -64,7 +65,8 @@ ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
 ax.legend(fontsize = 16)
 #ax.grid(True, which="major", linestyle="--", alpha=0.5)
-plt.savefig("solar radiation intensity.png", dpi=150)
+fig.tight_layout()
+plt.savefig("solar radiation intensity2.png", dpi=dpi)
 plt.show()
 
 """#plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
