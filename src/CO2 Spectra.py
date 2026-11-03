@@ -66,7 +66,7 @@ import matplotlib as mpl
 import matplotlib.font_manager
 from IPython.core.display import HTML
 mpl.rcParams['font.family'] = 'cmr10'
-fig, ax = plt.subplots(figsize=(8, 5), dpi=150)
+fig, ax = plt.subplots(figsize=(8, 4), dpi=150)
 
 
 length_ = len(absorption_frequencies)
@@ -87,6 +87,7 @@ ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
 ax.set_yscale('log')
 #ax.grid(True, which="major", linestyle="--", alpha=0.5)
+fig.tight_layout()
 plt.savefig("co2 cross section v1.png", dpi=150)
 plt.show()
 
