@@ -51,7 +51,8 @@ cross_section_matrix = np.zeros((length_of_HITRAN_filtered, no_altitude_steps))
 for alt in range(no_altitude_steps): # for each altitude step
     for r in range(length_of_HITRAN_filtered):
         for i in range(length_of_HITRAN_filtered):
-            cross_section_matrix[r] += cross_section(i, wavenumber[r], altitudes[alt], spectral_line_intensity, wavenumber, pressure_broadening)
+            cross_section_matrix[r, alt] += cross_section(i, wavenumber[r], altitudes[alt], spectral_line_intensity, wavenumber, pressure_broadening)
+print(cross_section_matrix)
 print(cross_section_matrix.shape)
 print(cross_section_matrix[1073,:])
 
@@ -59,6 +60,12 @@ if cross_section_matrix[1073, 0] == cross_section_matrix[1073, 1]:
     print('poo')
 else:
     print('wee')
+
+"""cross_section_matrix = np.zeros((1, no_altitude_steps))
+for alt in range(no_altitude_steps): # for each altitude step
+        for i in range(length_of_HITRAN_filtered):
+            cross_section_matrix[] += cross_section(i, wavenumber[r], altitudes[alt], spectral_line_intensity, wavenumber, pressure_broadening)
+print(cross_section_matrix)"""
 
 end_time = time.time()
 print(f"Execution time: {end_time - start_time} seconds")
