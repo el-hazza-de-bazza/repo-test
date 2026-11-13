@@ -13,7 +13,8 @@ print(HITRAN_data.head(1))
 print(len(wavenumber)/400)
 print(len(wavenumber))
 #btw column 1 is wavenumber (in cm^1), then second column is spectral line intensity, nd third is air-broadened HWHM.
-
+length = 3
+print(range(length))
 """plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
 ax.plot(

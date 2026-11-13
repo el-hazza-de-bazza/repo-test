@@ -101,8 +101,31 @@ def schwarzschild_equation(wavenumber, max_altitude, no_altitude_steps, spectral
 #must define these before the function is used:
 """altitudes = np.linspace(0, max_altitude, no_altitude_steps)
 dz = max_altitude/no_altitude_steps"""
-def schwarzschild_equation2(wavenumber, spectral_line_intensity, wavenumber_array, pressure_broadening, earth_temperature): # calculates spectral radiance for a specific frequency/wavenumber
+def schwarzschild_equation2(wavenumber, spectral_line_intensity, wavenumber_array, pressure_broadening, earth_temperature, altitudes, dz): # calculates spectral radiance for a specific frequency/wavenumber
      # max altitude could be 32km, earth temperature could be 296K to start
+     initial_radiance = planck_spectrum(wavenumber*c, earth_temperature)
+     spectral_radiances_dI = np.zeros(len(altitudes))
+     for r in range(len(altitudes)):
+         cross_section_sum = 0
+         for i in range(len(wavenumber_array)):
+             cross_section_sum += cross_section(i, wavenumber, altitudes[r], spectral_line_intensity, wavenumber_array, pressure_broadening)
+         number_density_r = number_density(altitudes[r])
+         planck_radiance_r = planck_spectrum(wavenumber*c, temperature_atm(altitudes[r]))
+         if r == 0:
+             spectral_radiances_dI[0] = dz * (-1 * number_density_r * cross_section_sum) * (initial_radiance - planck_radiance_r)
+         else:
+             spectral_radiances_dI[r] = dz * (-1 * number_density_r * cross_section_sum) * (spectral_radiances_dI[r-1] - planck_radiance_r)
+     spectral_radiances_integral = 0
+     for i in range(len(spectral_radiances_dI)):
+          spectral_radiances_integral += spectral_radiances_dI[i]
+     return spectral_radiances_integral
+
+#must define these before the function is used:
+"""altitudes = np.linspace(0, max_altitude, no_altitude_steps)
+dz = max_altitude/no_altitude_steps"""
+def schwarzschild_equation3(wavenumber, spectral_line_intensity, wavenumber_array, pressure_broadening, cross_section_matrix, earth_temperature): # calculates spectral radiance for a specific frequency/wavenumber
+     # max altitude could be 32km, earth temperature could be 296K to start
+     # cross section matrix of form (length of wavenumbers, no of altitudes)
      initial_radiance = planck_spectrum(wavenumber*c, earth_temperature)
      spectral_radiances_dI = np.zeros(len(altitudes))
      for r in range(len(altitudes)):
