@@ -64,7 +64,7 @@ for r in range(length_of_HITRAN_filtered):
         cross_section_matrix[r] += cross_section(i, wavenumber[r], spectral_line_intensity, wavenumber, pressure_broadening)
 
 #parameters for loop:
-tolerance = 10**17
+tolerance = 10**15
 error = 10**18
 trial_temps = np.array([100, 260])
 
