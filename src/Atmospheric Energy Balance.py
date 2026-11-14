@@ -13,8 +13,6 @@ start_time = time.time()
 #PARAMETERS
 max_altitude = 32000 # these two parameters dont matter anymore with our new single layer model
 no_altitude_steps = 1
-
-earth_temp = 273.15 - 10
 albedo = average_albedo
 CO2_ppm = co2_concentration
 atm_pressure = standard_earth_pressure
@@ -65,41 +63,92 @@ for r in range(length_of_HITRAN_filtered):
     for i in range(length_of_HITRAN_filtered):
         cross_section_matrix[r] += cross_section(i, wavenumber[r], spectral_line_intensity, wavenumber, pressure_broadening)
 
+#parameters for loop:
+tolerance = 10**17
+error = 10**18
+trial_temps = np.array([100, 260])
 
 
-# schwarschild time!!
-# just doing single layer
-length_of_HITRAN_filtered = length_of_HITRAN_filtered
-spectral_radiance_array = np.empty(length_of_HITRAN_filtered)
-z_0 = (boltzmann * earth_temp) / (g * average_mass_air_molecule)
-trop_temp = earth_temp - 0.000649 * z_0 * math.log((1 - 0.75), 10)
-for i in range(length_of_HITRAN_filtered):
-    optical_depth = atm_number_density_CO2 * cross_section_matrix[i] * z_0
-    exp_optical_depth = np.exp( -1 * optical_depth)
-    spectral_radiance_array[i] = (planck_spectrum(absorption_frequencies[i], earth_temp)*exp_optical_depth ) + ( planck_spectrum(absorption_frequencies[i], trop_temp) * (1 - exp_optical_depth))
-spectral_irradiance_array = 4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * spectral_radiance_array # power per frequency becuase we integrate over solid angle and mutliply by surface area of sphere
-#Integrate over frequency:
-earth_power_co2 = simpson(spectral_irradiance_array, absorption_frequencies)
+total_earth_power_trial = np.array([0, 0])
+for k in range(len(trial_temps)):
+    earth_temp = trial_temps[k]
+    length_of_HITRAN_filtered = length_of_HITRAN_filtered
+    spectral_radiance_array = np.empty(length_of_HITRAN_filtered)
+    z_0 = (boltzmann * earth_temp) / (g * average_mass_air_molecule)
+    trop_temp = earth_temp - 0.000649 * z_0 * math.log((1 - 0.75), 10)
+    for i in range(length_of_HITRAN_filtered):
+        optical_depth = atm_number_density_CO2 * cross_section_matrix[i] * z_0
+        exp_optical_depth = np.exp( -1 * optical_depth)
+        spectral_radiance_array[i] = (planck_spectrum(absorption_frequencies[i], earth_temp)*exp_optical_depth ) + ( planck_spectrum(absorption_frequencies[i], trop_temp) * (1 - exp_optical_depth))
+    spectral_irradiance_array = 4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * spectral_radiance_array # power per frequency becuase we integrate over solid angle and mutliply by surface area of sphere
+    #Integrate over frequency:
+    earth_power_co2 = simpson(spectral_irradiance_array, absorption_frequencies)
+    
+    # integrate other parts of earth spectrum: replace this with actual data at some point?
+    freq_step_size = 10**12
+    min_freq = 10**11
+    max_freq = 10**14
+    frequencies_section_1 = np.arange(min_freq, absorption_frequencies[0], freq_step_size)
+    SI_1 = np.zeros(len(frequencies_section_1))
+    for i in range(len(frequencies_section_1)):
+        SI_1[i] = spectral_irradiance(average_earth_radius, max_altitude + average_earth_radius, frequencies_section_1[i], earth_temp)
+    earth_power_1 = simpson(4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_1, frequencies_section_1) # multiplied by solid angle and surface area of atmosphere top, then integrate for power
+    frequencies_section_3 = np.arange(absorption_frequencies[-1], max_freq, freq_step_size)
+    SI_3 = np.zeros(len(frequencies_section_3))
+    for i in range(len(frequencies_section_3)):
+        SI_3[i] = spectral_irradiance(average_earth_radius, max_altitude + average_earth_radius, frequencies_section_3[i], earth_temp)
+    earth_power_3 = simpson(4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_3, frequencies_section_3) # multiplied by solid angle and surface area of atmosphere top, then integrate for power
+    
+    total_earth_power_trial[k] = earth_power_1 + earth_power_co2 + earth_power_3
 
-# integrate other parts of earth spectrum: replace this with actual data at some point?
-freq_step_size = 10**12
-min_freq = 0.1*10**14
-max_freq = 0.4*10**14
-frequencies_section_1 = np.arange(min_freq, absorption_frequencies[0], freq_step_size)
-SI_1 = np.zeros(len(frequencies_section_1))
-for i in range(len(frequencies_section_1)):
-    SI_1[i] = spectral_irradiance(average_earth_radius, max_altitude + average_earth_radius, frequencies_section_1[i], earth_temp)
-earth_power_1 = simpson(4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_1, frequencies_section_1) # multiplied by solid angle and surface area of atmosphere top, then integrate for power
-frequencies_section_3 = np.arange(absorption_frequencies[-1], max_freq, freq_step_size)
-SI_3 = np.zeros(len(frequencies_section_3))
-for i in range(len(frequencies_section_3)):
-    SI_3[i] = spectral_irradiance(average_earth_radius, max_altitude + average_earth_radius, frequencies_section_3[i], earth_temp)
-earth_power_3 = simpson(4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_3, frequencies_section_3) # multiplied by solid angle and surface area of atmosphere top, then integrate for power
+assert total_earth_power_trial[0] < sun_power
+assert total_earth_power_trial[1] > sun_power
 
-total_earth_power = earth_power_1 + earth_power_co2 + earth_power_3
+while abs(error) > tolerance:
+    # schwarschild time!!
+    # just doing single layer
+    earth_temp = (trial_temps[0] + trial_temps[1]) / 2
+    length_of_HITRAN_filtered = length_of_HITRAN_filtered
+    spectral_radiance_array = np.empty(length_of_HITRAN_filtered)
+    z_0 = (boltzmann * earth_temp) / (g * average_mass_air_molecule)
+    trop_temp = earth_temp - 0.000649 * z_0 * math.log((1 - 0.75), 10)
+    for i in range(length_of_HITRAN_filtered):
+        optical_depth = atm_number_density_CO2 * cross_section_matrix[i] * z_0
+        exp_optical_depth = np.exp( -1 * optical_depth)
+        spectral_radiance_array[i] = (planck_spectrum(absorption_frequencies[i], earth_temp)*exp_optical_depth ) + ( planck_spectrum(absorption_frequencies[i], trop_temp) * (1 - exp_optical_depth))
+    spectral_irradiance_array = 4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * spectral_radiance_array # power per frequency becuase we integrate over solid angle and mutliply by surface area of sphere
+    #Integrate over frequency:
+    earth_power_co2 = simpson(spectral_irradiance_array, absorption_frequencies)
+
+    # integrate other parts of earth spectrum: replace this with actual data at some point?
+    freq_step_size = 10**12
+    min_freq = 10**11
+    max_freq = 10**14
+    frequencies_section_1 = np.arange(min_freq, absorption_frequencies[0], freq_step_size)
+    SI_1 = np.zeros(len(frequencies_section_1))
+    for i in range(len(frequencies_section_1)):
+        SI_1[i] = spectral_irradiance(average_earth_radius, max_altitude + average_earth_radius, frequencies_section_1[i], earth_temp)
+    earth_power_1 = simpson(4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_1, frequencies_section_1) # multiplied by solid angle and surface area of atmosphere top, then integrate for power
+    frequencies_section_3 = np.arange(absorption_frequencies[-1], max_freq, freq_step_size)
+    SI_3 = np.zeros(len(frequencies_section_3))
+    for i in range(len(frequencies_section_3)):
+        SI_3[i] = spectral_irradiance(average_earth_radius, max_altitude + average_earth_radius, frequencies_section_3[i], earth_temp)
+    earth_power_3 = simpson(4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_3, frequencies_section_3) # multiplied by solid angle and surface area of atmosphere top, then integrate for power
+
+    total_earth_power = earth_power_1 + earth_power_co2 + earth_power_3
+    if total_earth_power < sun_power:
+        trial_temps[0] = earth_temp
+    else:
+        trial_temps[1] = earth_temp
+    error = total_earth_power - sun_power
 
 print(total_earth_power)
 print(sun_power)
+print(earth_temp)
+
+
+end_time = time.time()
+print(f"Execution time: {end_time - start_time} seconds")
 
 #plot this bad boy
 import matplotlib as mpl
@@ -125,6 +174,3 @@ ax.grid(True, which="major", linestyle="--", alpha=0.5)
 plt.savefig("earth_power_plot.png", dpi=150)
 plt.show()
 
-
-end_time = time.time()
-print(f"Execution time: {end_time - start_time} seconds")
