@@ -14,7 +14,7 @@ start_time = time.time()
 max_altitude = 32000 # these two parameters dont matter anymore with our new single layer model
 no_altitude_steps = 1
 
-earth_temp = standard_earth_temp
+earth_temp = 273.15 - 10
 albedo = average_albedo
 CO2_ppm = co2_concentration
 atm_pressure = standard_earth_pressure
@@ -83,8 +83,8 @@ earth_power_co2 = simpson(spectral_irradiance_array, absorption_frequencies)
 
 # integrate other parts of earth spectrum: replace this with actual data at some point?
 freq_step_size = 10**12
-min_freq = 10**11
-max_freq = 10**14
+min_freq = 0.1*10**14
+max_freq = 0.4*10**14
 frequencies_section_1 = np.arange(min_freq, absorption_frequencies[0], freq_step_size)
 SI_1 = np.zeros(len(frequencies_section_1))
 for i in range(len(frequencies_section_1)):
