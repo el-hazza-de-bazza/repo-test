@@ -13,7 +13,7 @@ def planck_spectrum(freq, temperature):
 
 def planck_intensity(freq, temperature):
      #accepts freq in Hz and temperature in K
-     #returns spectral radiance in units W / m^2 / Hz
+     #returns spectral irradiance in units W / m^2 / Hz
      return np.pi * ((average_sun_radius/earth_sun_distance)**2) * (2*h*(freq**3)/(c**2))/(np.exp((h*freq)/(boltzmann*temperature)) - 1)
 
 # Temperature and pressure models taken from ICAO Standard Atmosphere model : https://en.wikipedia.org/wiki/International_Standard_Atmosphere and https://www.aviationhunt.com/standard-atmosphere-calculator/
@@ -69,7 +69,13 @@ plt.show()"""
 def spectral_irradiance(radius_of_source, distance, frequency, temperature):
     return np.pi * planck_spectrum(frequency, temperature) * (radius_of_source/distance)**2
 
-def cross_section(wavenumber_index, wavenumber, altitude, spectral_line_intensity, wavenumber_array, pressure_broadening): # calculates cross section for a specific wavenumber
+def cross_section(wavenumber_index, wavenumber, spectral_line_intensity, wavenumber_array, pressure_broadening): # calculates cross section for a specific wavenumber
+    temperature = 296 # leave these alone - trust me
+    pressure = 101325 # leave these alone - trust me buster
+    broadening_at_alt = pressure_broadening[wavenumber_index]
+    return (spectral_line_intensity[wavenumber_index] * broadening_at_alt) / (np.pi * (broadening_at_alt**2 + (wavenumber - wavenumber_array[wavenumber_index])**2))
+
+def cross_section2(wavenumber_index, wavenumber, altitude, spectral_line_intensity, wavenumber_array, pressure_broadening): # calculates cross section for a specific wavenumber
     temperature = 296 # leave these alone - trust me
     pressure = 101325 # leave these alone - trust me buster
     broadening_at_alt = (number_density(altitude)/(pressure/(boltzmann*temperature)))*pressure_broadening[wavenumber_index]    # we are adjusting the pressure broadening
