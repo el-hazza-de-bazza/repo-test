@@ -48,7 +48,7 @@ HITRAN_data = pd.read_csv(
     header=0,
 )
 df_HITRAN = pd.DataFrame(HITRAN_data)
-df_HITRAN_filtered = df_HITRAN[(df_HITRAN.iloc[:, 1] > 10**(-24))] # filtering out data that wont have much of an effect to make code faster
+df_HITRAN_filtered = df_HITRAN[(df_HITRAN.iloc[:, 1] > 10**(-30))] # filtering out data that wont have much of an effect to make code faster
 wavenumber = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[0]].values.tolist()) * 10**2 # converts to /m
 absorption_frequencies = wavenumber*(c) # converts wavenumber in /m to frequency in Hz
 spectral_line_intensity = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[1]].values.tolist()) * (10**(-2)) #converting units from whatever cursed units HITRAN is using to SI units
@@ -64,9 +64,9 @@ for r in range(length_of_HITRAN_filtered):
         cross_section_matrix[r] += cross_section(i, wavenumber[r], spectral_line_intensity, wavenumber, pressure_broadening)
 
 #parameters for loop:
-tolerance = 10**15
-error = 10**18
-trial_temps = np.array([100, 260])
+tolerance = 10**14
+error = tolerance * 10
+trial_temps = np.array([250, 270])
 
 
 total_earth_power_trial = np.array([0, 0])
@@ -75,7 +75,7 @@ for k in range(len(trial_temps)):
     length_of_HITRAN_filtered = length_of_HITRAN_filtered
     spectral_radiance_array = np.empty(length_of_HITRAN_filtered)
     z_0 = (boltzmann * earth_temp) / (g * average_mass_air_molecule)
-    trop_temp = earth_temp - 0.000649 * z_0 * math.log((1 - 0.75), 10)
+    trop_temp = earth_temp + 0.000649 * z_0 * math.log((1 - 0.75), 10)
     for i in range(length_of_HITRAN_filtered):
         optical_depth = atm_number_density_CO2 * cross_section_matrix[i] * z_0
         exp_optical_depth = np.exp( -1 * optical_depth)
@@ -92,12 +92,12 @@ for k in range(len(trial_temps)):
     SI_1 = np.zeros(len(frequencies_section_1))
     for i in range(len(frequencies_section_1)):
         SI_1[i] = spectral_irradiance(average_earth_radius, max_altitude + average_earth_radius, frequencies_section_1[i], earth_temp)
-    earth_power_1 = simpson(4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_1, frequencies_section_1) # multiplied by solid angle and surface area of atmosphere top, then integrate for power
+    earth_power_1 = simpson(4 * (np.pi) * ((average_earth_radius+max_altitude)**2) * SI_1, frequencies_section_1)
     frequencies_section_3 = np.arange(absorption_frequencies[-1], max_freq, freq_step_size)
     SI_3 = np.zeros(len(frequencies_section_3))
     for i in range(len(frequencies_section_3)):
         SI_3[i] = spectral_irradiance(average_earth_radius, max_altitude + average_earth_radius, frequencies_section_3[i], earth_temp)
-    earth_power_3 = simpson(4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_3, frequencies_section_3) # multiplied by solid angle and surface area of atmosphere top, then integrate for power
+    earth_power_3 = simpson(4 * (np.pi) * ((average_earth_radius+max_altitude)**2) * SI_3, frequencies_section_3) 
     
     total_earth_power_trial[k] = earth_power_1 + earth_power_co2 + earth_power_3
 
@@ -111,7 +111,7 @@ while abs(error) > tolerance:
     length_of_HITRAN_filtered = length_of_HITRAN_filtered
     spectral_radiance_array = np.empty(length_of_HITRAN_filtered)
     z_0 = (boltzmann * earth_temp) / (g * average_mass_air_molecule)
-    trop_temp = earth_temp - 0.000649 * z_0 * math.log((1 - 0.75), 10)
+    trop_temp = earth_temp + 0.000649 * z_0 * math.log((1 - 0.75), 10)
     for i in range(length_of_HITRAN_filtered):
         optical_depth = atm_number_density_CO2 * cross_section_matrix[i] * z_0
         exp_optical_depth = np.exp( -1 * optical_depth)
@@ -128,12 +128,12 @@ while abs(error) > tolerance:
     SI_1 = np.zeros(len(frequencies_section_1))
     for i in range(len(frequencies_section_1)):
         SI_1[i] = spectral_irradiance(average_earth_radius, max_altitude + average_earth_radius, frequencies_section_1[i], earth_temp)
-    earth_power_1 = simpson(4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_1, frequencies_section_1) # multiplied by solid angle and surface area of atmosphere top, then integrate for power
+    earth_power_1 = simpson(4 * (np.pi) * ((average_earth_radius+max_altitude)**2) * SI_1, frequencies_section_1) 
     frequencies_section_3 = np.arange(absorption_frequencies[-1], max_freq, freq_step_size)
     SI_3 = np.zeros(len(frequencies_section_3))
     for i in range(len(frequencies_section_3)):
         SI_3[i] = spectral_irradiance(average_earth_radius, max_altitude + average_earth_radius, frequencies_section_3[i], earth_temp)
-    earth_power_3 = simpson(4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_3, frequencies_section_3) # multiplied by solid angle and surface area of atmosphere top, then integrate for power
+    earth_power_3 = simpson(4 * (np.pi) * ((average_earth_radius+max_altitude)**2) * SI_3, frequencies_section_3) 
 
     total_earth_power = earth_power_1 + earth_power_co2 + earth_power_3
     if total_earth_power < sun_power:
