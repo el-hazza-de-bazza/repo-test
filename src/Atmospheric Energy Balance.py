@@ -62,6 +62,7 @@ cross_section_matrix = np.zeros(length_of_HITRAN_filtered)
 for r in range(length_of_HITRAN_filtered):
     for i in range(length_of_HITRAN_filtered):
         cross_section_matrix[r] += cross_section(i, wavenumber[r], spectral_line_intensity, wavenumber, pressure_broadening)
+print('cross sections calculated')
 
 #parameters for loop:
 tolerance = 10**14
@@ -100,6 +101,7 @@ for k in range(len(trial_temps)):
     earth_power_3 = simpson(4 * (np.pi) * ((average_earth_radius+max_altitude)**2) * SI_3, frequencies_section_3) 
     
     total_earth_power_trial[k] = earth_power_1 + earth_power_co2 + earth_power_3
+    print(f"{k+1} trial calculated")
 
 assert total_earth_power_trial[0] < sun_power
 assert total_earth_power_trial[1] > sun_power
@@ -141,6 +143,7 @@ while abs(error) > tolerance:
     else:
         trial_temps[1] = earth_temp
     error = total_earth_power - sun_power
+    print(f"{k+1} iteration calculated")
 
 print(total_earth_power)
 print(sun_power)
