@@ -65,9 +65,9 @@ for r in range(length_of_HITRAN_filtered):
 print('cross sections calculated')
 
 #parameters for loop:
-tolerance = 10**14
+tolerance = 10**10
 error = tolerance * 10
-trial_temps = np.array([250, 270])
+trial_temps = np.array([200, 400], dtype = 'float')
 
 
 total_earth_power_trial = np.array([0, 0])
@@ -76,7 +76,7 @@ for k in range(len(trial_temps)):
     length_of_HITRAN_filtered = length_of_HITRAN_filtered
     spectral_radiance_array = np.empty(length_of_HITRAN_filtered)
     z_0 = (boltzmann * earth_temp) / (g * average_mass_air_molecule)
-    trop_temp = earth_temp + 0.000649 * z_0 * math.log((1 - 0.75), 10)
+    trop_temp = earth_temp + 0.00649 * z_0 * math.log((1 - 0.75), 10)
     for i in range(length_of_HITRAN_filtered):
         optical_depth = atm_number_density_CO2 * cross_section_matrix[i] * z_0
         exp_optical_depth = np.exp( -1 * optical_depth)
@@ -105,6 +105,7 @@ for k in range(len(trial_temps)):
 
 assert total_earth_power_trial[0] < sun_power
 assert total_earth_power_trial[1] > sun_power
+iteration = 0
 
 while abs(error) > tolerance:
     # schwarschild time!!
@@ -113,7 +114,7 @@ while abs(error) > tolerance:
     length_of_HITRAN_filtered = length_of_HITRAN_filtered
     spectral_radiance_array = np.empty(length_of_HITRAN_filtered)
     z_0 = (boltzmann * earth_temp) / (g * average_mass_air_molecule)
-    trop_temp = earth_temp + 0.000649 * z_0 * math.log((1 - 0.75), 10)
+    trop_temp = earth_temp + 0.00649 * z_0 * math.log((1 - 0.75), 10)
     for i in range(length_of_HITRAN_filtered):
         optical_depth = atm_number_density_CO2 * cross_section_matrix[i] * z_0
         exp_optical_depth = np.exp( -1 * optical_depth)
@@ -125,7 +126,7 @@ while abs(error) > tolerance:
     # integrate other parts of earth spectrum: replace this with actual data at some point?
     freq_step_size = 10**12
     min_freq = 10**11
-    max_freq = 10**14
+    max_freq = 0.8*10**14
     frequencies_section_1 = np.arange(min_freq, absorption_frequencies[0], freq_step_size)
     SI_1 = np.zeros(len(frequencies_section_1))
     for i in range(len(frequencies_section_1)):
@@ -140,10 +141,11 @@ while abs(error) > tolerance:
     total_earth_power = earth_power_1 + earth_power_co2 + earth_power_3
     if total_earth_power < sun_power:
         trial_temps[0] = earth_temp
-    else:
+    if total_earth_power > sun_power:
         trial_temps[1] = earth_temp
     error = total_earth_power - sun_power
-    print(f"{k+1} iteration calculated")
+    iteration += 1
+    print(f"{iteration} iteration calculated with temperature {earth_temp} K")
 
 print(total_earth_power)
 print(sun_power)
@@ -160,8 +162,8 @@ from IPython.core.display import HTML
 mpl.rcParams['font.family'] = 'cmr10'
 fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
 
-power_per_freq_1 = 4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_1
-power_per_freq_3 = 4 * (np.pi**2) * ((average_earth_radius+max_altitude)**2) * SI_3
+power_per_freq_1 = 4 * (np.pi) * ((average_earth_radius+max_altitude)**2) * SI_1
+power_per_freq_3 = 4 * (np.pi) * ((average_earth_radius+max_altitude)**2) * SI_3
 power_per_freq = np.append(power_per_freq_1, spectral_irradiance_array)
 power_per_freq = np.append(power_per_freq, power_per_freq_3)
 freq_sections = np.append(frequencies_section_1, absorption_frequencies)
