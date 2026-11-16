@@ -52,12 +52,12 @@ if modtran_csv.exists():
 dz = max_altitude/no_altitude_steps"""
 
 HITRAN_data = pd.read_csv(
-    Path(__file__).with_name("CO2Min.csv"),
+    Path(__file__).with_name("CO2_wider.csv"),
     usecols=[0, 1, 2],
     header=0,
 )
 df_HITRAN = pd.DataFrame(HITRAN_data)
-df_HITRAN_filtered = df_HITRAN[(df_HITRAN.iloc[:, 1] > 10**(-26))] # filtering out data that wont have much of an effect to make code faster
+df_HITRAN_filtered = df_HITRAN#[(df_HITRAN.iloc[:, 1] > 10**(-30))] # filtering out data that wont have much of an effect to make code faster
 wavenumber = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[0]].values.tolist()) * 10**2 # converts to /m
 absorption_frequencies = wavenumber*(c) # converts wavenumber in /m to frequency in Hz
 spectral_line_intensity = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[1]].values.tolist()) * (10**(-2)) #converting units from whatever cursed units HITRAN is using to SI units
@@ -77,7 +77,9 @@ print('cross sections calculated')
 tolerance = 10**10
 error = tolerance * 10
 trial_temps = np.array([200, 400], dtype = 'float')
-
+freq_step_size = 10**12
+min_freq = 10**11
+max_freq = 10**14
 
 total_earth_power_trial = np.array([0, 0])
 for k in range(len(trial_temps)):
@@ -95,9 +97,6 @@ for k in range(len(trial_temps)):
     earth_power_co2 = simpson(spectral_irradiance_array, absorption_frequencies)
     
     # integrate other parts of earth spectrum: replace this with actual data at some point?
-    freq_step_size = 10**12
-    min_freq = 10**11
-    max_freq = 10**14
     frequencies_section_1 = np.arange(min_freq, absorption_frequencies[0], freq_step_size)
     SI_1 = np.zeros(len(frequencies_section_1))
     for i in range(len(frequencies_section_1)):
@@ -133,9 +132,6 @@ while abs(error) > tolerance:
     earth_power_co2 = simpson(spectral_irradiance_array, absorption_frequencies)
 
     # integrate other parts of earth spectrum: replace this with actual data at some point?
-    freq_step_size = 10**12
-    min_freq = 10**11
-    max_freq = 0.8*10**14
     frequencies_section_1 = np.arange(min_freq, absorption_frequencies[0], freq_step_size)
     SI_1 = np.zeros(len(frequencies_section_1))
     for i in range(len(frequencies_section_1)):
