@@ -14,7 +14,7 @@ start_time = time.time()
 max_altitude = 32000 # these two parameters dont matter anymore with our new single layer model
 no_altitude_steps = 1
 albedo = average_albedo
-CO2_ppm = co2_concentration
+CO2_ppm = 428 * 10 ** (-6) # 428ppm is current
 atm_pressure = standard_earth_pressure
 atm_temp = standard_earth_temp
 atm_number_density_CO2 = CO2_ppm * atm_pressure/(boltzmann*atm_temp)
@@ -198,6 +198,6 @@ ax.legend(fontsize=12)
 if modtran_frequency_hz.size > 0 and modtran_radiance.size > 0:
     ax.set_yscale('log')"""
 
-plt.savefig("earth_power_plot.png", dpi=150)
+plt.savefig("earth_power_plot_350ppm.png", dpi=150)
 plt.show()
 
