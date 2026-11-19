@@ -14,7 +14,7 @@ start_time = time.time()
 max_altitude = 32000 # these two parameters dont matter anymore with our new single layer model
 no_altitude_steps = 1
 albedo = average_albedo
-CO2_ppm = 428 * 10 ** (-6) # 428ppm is current
+CO2_ppm = 430 * 10 ** (-6) # 430ppm is current
 atm_pressure = standard_earth_pressure
 atm_temp = standard_earth_temp
 atm_number_density_CO2 = CO2_ppm * atm_pressure/(boltzmann*atm_temp)
@@ -34,14 +34,14 @@ intensity_per_wavelength = np.array(df_e490[df_e490.columns[1]].values.tolist())
 sun_intensity = simpson(intensity_per_wavelength, wavelength)
 sun_power = (1-albedo) * sun_intensity * np.pi * (average_earth_radius)**2
 
-modtran_csv = Path(__file__).with_name("modtran_radiance.csv")
+"""modtran_csv = Path(__file__).with_name("modtran_radiance.csv")
 modtran_frequency_hz = np.array([])
 modtran_radiance = np.array([])
 if modtran_csv.exists():
     modtran_df = pd.read_csv(modtran_csv)
     if {"frequency_hz", "total_radiance_W_m2_sr_Hz"}.issubset(modtran_df.columns):
         modtran_frequency_hz = modtran_df["frequency_hz"].to_numpy(dtype=float)
-        modtran_radiance = modtran_df["total_radiance_W_m2_sr_Hz"].to_numpy(dtype=float)
+        modtran_radiance = modtran_df["total_radiance_W_m2_sr_Hz"].to_numpy(dtype=float)"""
 
 
 
@@ -53,12 +53,12 @@ if modtran_csv.exists():
 dz = max_altitude/no_altitude_steps"""
 
 HITRAN_data = pd.read_csv(
-    Path(__file__).with_name("CO2_wider.csv"),
+    Path(__file__).with_name("CO2Min.csv"),
     usecols=[0, 1, 2],
     header=0,
 )
 df_HITRAN = pd.DataFrame(HITRAN_data)
-df_HITRAN_filtered = df_HITRAN#[(df_HITRAN.iloc[:, 1] > 10**(-30))] # filtering out data that wont have much of an effect to make code faster
+df_HITRAN_filtered = df_HITRAN[(df_HITRAN.iloc[:, 1] > 10**(-25))] # filtering out data that wont have much of an effect to make code faster
 wavenumber = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[0]].values.tolist()) * 10**2 # converts to /m
 absorption_frequencies = wavenumber*(c) # converts wavenumber in /m to frequency in Hz
 spectral_line_intensity = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[1]].values.tolist()) * (10**(-2)) #converting units from whatever cursed units HITRAN is using to SI units
@@ -166,17 +166,18 @@ import matplotlib as mpl
 import matplotlib.font_manager
 from IPython.core.display import HTML
 mpl.rcParams['font.family'] = 'cmr10'
-fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
+fig, ax = plt.subplots(figsize=(8, 4), dpi=150)
 
-power_per_freq_1 = 4 * (np.pi) * ((average_earth_radius+max_altitude)**2) * SI_1
-power_per_freq_3 = 4 * (np.pi) * ((average_earth_radius+max_altitude)**2) * SI_3
+spectral_irradiance_array = spectral_irradiance_array / (4 * (np.pi) * ((average_earth_radius+max_altitude)**2))
+power_per_freq_1 = SI_1
+power_per_freq_3 = SI_3
 power_per_freq = np.append(power_per_freq_1, spectral_irradiance_array)
 power_per_freq = np.append(power_per_freq, power_per_freq_3)
 freq_sections = np.append(frequencies_section_1, absorption_frequencies)
 freq_sections = np.append(freq_sections, frequencies_section_3)
-ax.plot(freq_sections, power_per_freq, color = 'red', label='Modelled outgoing radiation')
+ax.plot(freq_sections*10**(-12), power_per_freq*10**(12), color = "#1F289C", label='430ppm')
 
-if modtran_frequency_hz.size > 0 and modtran_radiance.size > 0:
+"""if modtran_frequency_hz.size > 0 and modtran_radiance.size > 0:
     modtran_order = np.argsort(modtran_frequency_hz)
     ax.plot(
         modtran_frequency_hz[modtran_order],
@@ -185,20 +186,22 @@ if modtran_frequency_hz.size > 0 and modtran_radiance.size > 0:
         linestyle='--',
         linewidth=1.5,
         label='MODTRAN simulation'
-    )
+    )"""
 
-ax.set_xlabel("Frequency (Hz)", fontsize=16, fontweight="bold")
-ax.set_ylabel("Power Density (W/Hz)", fontsize=16, fontweight="bold")
+ax.set_xlabel("Frequency (THz)", fontsize=18, fontweight="bold")
+ax.set_ylabel("Spectral Irradiance\n(10$^{-12}$ Wm$^{-2}$Hz$^{-1}$)", fontsize=18, fontweight="bold")
 ax.tick_params(axis="both", which="major", labelsize=14, direction="in", length=6, width=1.2)
 ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
-ax.grid(True, which="major", linestyle="--", alpha=0.5)
-ax.legend(fontsize=12)
+#ax.grid(True, which="major", linestyle="--", alpha=0.5)
+ax.legend(fontsize=16, facecolor = "#1F289C", framealpha = 0)
+ax.set_xlim(0, 60)
+fig.tight_layout()
 
 """# The MODTRAN output spans many orders of magnitude, so a log scale keeps the comparison readable.
 if modtran_frequency_hz.size > 0 and modtran_radiance.size > 0:
     ax.set_yscale('log')"""
 
-plt.savefig("earth_power_plot_350ppm.png", dpi=150)
+plt.savefig("earth_spectral_irradiance.png", dpi=150)
 plt.show()
 
