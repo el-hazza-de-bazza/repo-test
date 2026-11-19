@@ -21,6 +21,7 @@ atm_number_density_CO2 = CO2_ppm * atm_pressure/(boltzmann*atm_temp)
 average_mass_air_molecule = 4.81 * 10**(-26)
 
 
+
 # Calculating incoming radiation using E490 data - maybe we should change this because it doesnt account for atmospheric absorption
 e490_data = pd.read_csv(
     Path(__file__).with_name("e490_data.txt"),
