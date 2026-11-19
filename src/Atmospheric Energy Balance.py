@@ -16,8 +16,6 @@ no_altitude_steps = 1
 albedo = average_albedo
 CO2_ppm = 430 * 10 ** (-6) # 430ppm is current
 atm_pressure = standard_earth_pressure
-atm_temp = standard_earth_temp
-atm_number_density_CO2 = CO2_ppm * atm_pressure/(boltzmann*atm_temp)
 average_mass_air_molecule = 4.81 * 10**(-26)
 
 
@@ -53,12 +51,12 @@ if modtran_csv.exists():
 dz = max_altitude/no_altitude_steps"""
 
 HITRAN_data = pd.read_csv(
-    Path(__file__).with_name("CO2Min.csv"),
+    Path(__file__).with_name("CO2_wider.csv"),
     usecols=[0, 1, 2],
     header=0,
 )
 df_HITRAN = pd.DataFrame(HITRAN_data)
-df_HITRAN_filtered = df_HITRAN[(df_HITRAN.iloc[:, 1] > 10**(-25))] # filtering out data that wont have much of an effect to make code faster
+df_HITRAN_filtered = df_HITRAN[(df_HITRAN.iloc[:, 1] > 10**(-35))] # filtering out data that wont have much of an effect to make code faster
 wavenumber = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[0]].values.tolist()) * 10**2 # converts to /m
 absorption_frequencies = wavenumber*(c) # converts wavenumber in /m to frequency in Hz
 spectral_line_intensity = np.array(df_HITRAN_filtered[df_HITRAN_filtered.columns[1]].values.tolist()) * (10**(-2)) #converting units from whatever cursed units HITRAN is using to SI units
@@ -89,6 +87,8 @@ for k in range(len(trial_temps)):
     spectral_radiance_array = np.empty(length_of_HITRAN_filtered)
     z_0 = (boltzmann * earth_temp) / (g * average_mass_air_molecule)
     trop_temp = earth_temp + 0.00649 * z_0 * math.log((1 - 0.75), 10)
+    atm_temp = earth_temp # yep this is a poor model assuming isothermal
+    atm_number_density_CO2 = CO2_ppm * atm_pressure/(boltzmann*atm_temp)
     for i in range(length_of_HITRAN_filtered):
         optical_depth = atm_number_density_CO2 * cross_section_matrix[i] * z_0
         exp_optical_depth = np.exp( -1 * optical_depth)
@@ -124,6 +124,8 @@ while abs(error) > tolerance:
     spectral_radiance_array = np.empty(length_of_HITRAN_filtered)
     z_0 = (boltzmann * earth_temp) / (g * average_mass_air_molecule)
     trop_temp = earth_temp + 0.00649 * z_0 * math.log((1 - 0.75), 10)
+    atm_temp = earth_temp # yep this is a poor model assuming isothermal
+    atm_number_density_CO2 = CO2_ppm * atm_pressure/(boltzmann*atm_temp)
     for i in range(length_of_HITRAN_filtered):
         optical_depth = atm_number_density_CO2 * cross_section_matrix[i] * z_0
         exp_optical_depth = np.exp( -1 * optical_depth)
@@ -168,9 +170,9 @@ from IPython.core.display import HTML
 mpl.rcParams['font.family'] = 'cmr10'
 fig, ax = plt.subplots(figsize=(8, 4), dpi=150)
 
-spectral_irradiance_array = spectral_irradiance_array / (4 * (np.pi) * ((average_earth_radius+max_altitude)**2))
-power_per_freq_1 = SI_1
-power_per_freq_3 = SI_3
+spectral_irradiance_array = spectral_irradiance_array / (4 * (np.pi) * ((average_earth_radius+max_altitude)**2)) # for power density, remove the division by (4 * (np.pi) * ((average_earth_radius+max_altitude)**2))
+power_per_freq_1 = SI_1 # for power density, multiple by (4 * (np.pi) * ((average_earth_radius+max_altitude)**2))
+power_per_freq_3 = SI_3 # for power density, multiple by (4 * (np.pi) * ((average_earth_radius+max_altitude)**2))
 power_per_freq = np.append(power_per_freq_1, spectral_irradiance_array)
 power_per_freq = np.append(power_per_freq, power_per_freq_3)
 freq_sections = np.append(frequencies_section_1, absorption_frequencies)
@@ -195,7 +197,7 @@ ax.tick_params(axis="both", which="minor", direction="in", length=3, width=1)
 ax.minorticks_on()
 #ax.grid(True, which="major", linestyle="--", alpha=0.5)
 ax.legend(fontsize=16, facecolor = "#1F289C", framealpha = 0)
-ax.set_xlim(0, 60)
+ax.set_xlim(-1.5, 61)
 fig.tight_layout()
 
 """# The MODTRAN output spans many orders of magnitude, so a log scale keeps the comparison readable.
