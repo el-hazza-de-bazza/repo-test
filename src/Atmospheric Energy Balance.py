@@ -207,3 +207,11 @@ if modtran_frequency_hz.size > 0 and modtran_radiance.size > 0:
 plt.savefig("earth_spectral_irradiance.png", dpi=150)
 plt.show()
 
+fig, ax = plt.subplots(figsize=(2.2, 2), dpi=150)
+ax.plot(freq_sections*10**(-12), power_per_freq*10**(12), color = "#1F289C", label='430ppm', linewidth=0.5)
+ax.tick_params(axis="both", which="major", labelsize=12, direction="in", length=4, width=1)
+ax.set_xlim(15, 25)
+ax.set_ylim(4.5, 10.5)
+fig.tight_layout()
+plt.savefig("earth_spectral_irradiance_zoomed.png", dpi=150)
+plt.show()

@@ -11,4 +11,4 @@ average_earth_radius = 6371 * (10 ** 3)
 average_sun_radius = 695700 * (10 ** 3)
 earth_sun_distance = 149.6 * (10 ** 9)
 sun_temperature = 5772
-average_albedo = 0.3
+average_albedo = 0.296
